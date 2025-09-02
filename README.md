@@ -94,12 +94,24 @@ yarn install --frozen-lockfile
 ## 🏗️ Build Options
 
 ### Local Android Release Build (APK)
+
 If `android/` folder doesn’t exist:
 ```bash
 npx expo prebuild -p android
 ```
 
-Build:
+> **Critical:** Enable WebView debugging in release builds so Appium can attach.  
+> Edit:
+> ```
+> WebViewLab-React-Native-App/android/app/src/main/java/com/example/webviewlab/MainApplication.kt
+> ```
+> Add:
+> ```kotlin
+> // Critical: expose WEBVIEW_* context even in release builds
+> WebView.setWebContentsDebuggingEnabled(true)
+> ```
+
+Then build:
 ```powershell
 cd android
 .\gradlew.bat clean
@@ -110,7 +122,7 @@ Artifacts:
 - APK: `android/app/build/outputs/apk/release/app-release.apk`
 - AAB: `android/app/build/outputs/bundle/release/app-release.aab`
 
-Install:
+Install to device:
 ```powershell
 adb install -r android/app/build/outputs/apk/release/app-release.apk
 ```
