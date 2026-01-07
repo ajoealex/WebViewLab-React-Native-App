@@ -59,7 +59,7 @@ WebViewLab provides a **reusable native shell** that allows teams to validate th
 │        Web Application       │
 │  (Under Development / QA)    │
 │                              │
-│  HTML · CSS · JS · APIs       │
+│  HTML · CSS · JS · APIs      │
 └──────────────┬───────────────┘
                │
                │ URL Load
@@ -68,21 +68,21 @@ WebViewLab provides a **reusable native shell** that allows teams to validate th
 │        WebViewLab App        │
 │  React Native + Expo         │
 │                              │
-│  ┌────────────────────────┐ │
-│  │    React Native UI     │ │
-│  │  (Home / Controls)    │ │
-│  └───────────┬────────────┘ │
+│  ┌────────────────────────┐  │
+│  │    React Native UI     │  │
+│  │  (Home / Controls)     │  │
+│  └───────────┬────────────┘  │
 │              │               │
-│  ┌───────────▼────────────┐ │
-│  │     WebView Layer      │ │
-│  │ react-native-webview  │ │
-│  │ Mobile User Agent     │ │
-│  └───────────┬────────────┘ │
+│  ┌───────────▼────────────┐  │
+│  │     WebView Layer      │  │
+│  │ react-native-webview   │  │
+│  │ Mobile User Agent      │  │
+│  └───────────┬────────────┘  │
 │              │               │
-│  ┌───────────▼────────────┐ │
-│  │ Screenshot Mode        │ │
-│  │ Tap + Coordinate Map  │ │
-│  └────────────────────────┘ │
+│  ┌───────────▼────────────┐  │
+│  │ Screenshot Mode        │  │
+│  │ Tap + Coordinate Map   │  │
+│  └────────────────────────┘  │
 └──────────────┬───────────────┘
                │
                │ WebView Debugging Enabled
