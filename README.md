@@ -1,139 +1,172 @@
-# WebViewLab — Hybrid Testing Harness for Appium
+# WebViewLab
+### Hybrid Testing Harness for Appium and WebView-Based Apps
 
-WebViewLab is a lightweight **React Native / Expo app** that helps **hybrid app developers** and **QA engineers** test, debug, and validate web apps inside a native shell.  
+WebViewLab is a lightweight **React Native / Expo utility app** built for **hybrid app developers** and **QA engineers** who need to test and validate **web applications inside a native WebView container**.
 
-It removes the need to rebuild an APK for every UI change and provides an easy way to validate **accessibility IDs, DOM mappings, and tap coordinates** when working with Appium.
-
----
-
-## 🎯 Purpose
-
-WebViewLab is designed to:
-
-- **Test Web Apps in a Native Shell**  
-  Enter a URL and render it in a full-screen WebView. Appium can then switch to `WEBVIEW_*` context and inspect DOM elements directly.  
-
-- **Simulate UI Flows with Screenshots**  
-  Upload a static screenshot, display it full-screen, and tap on it to study coordinates and replicate touch interactions.  
-
-- **Validate Appium Mappings**  
-  Compare how Appium generates XML trees for hybrid apps and how different HTML elements translate between **native vs. web contexts**.  
+It enables rapid visual and functional verification of web UIs on **real devices and emulators** without rebuilding APKs for every change, making it ideal during the early and mid phases of hybrid app development.
 
 ---
 
-## 🔑 Key Uses
+## 🎯 Why WebViewLab Exists
 
-- Quickly test how a web app looks and feels inside a hybrid container  
-- Verify accessibility identifiers for Appium automation  
-- Validate DOM-to-native mapping for hybrid app elements  
-- Debug tap positions on static UI screenshots without live HTML  
-- Speed up iteration cycles by avoiding repeated APK rebuilds  
+When building hybrid apps, web content often behaves differently inside a native WebView compared to desktop or mobile browsers.
+
+Common issues include:
+- Layout shifts and viewport inconsistencies
+- Font rendering and scaling differences
+- Keyboard and focus behavior
+- Safe-area and scrolling problems
+- Appium context and selector mismatches
+
+WebViewLab provides a **reusable native shell** that allows teams to validate these issues early, fast, and repeatedly.
 
 ---
 
-## 📱 Screens / Views
+## 🧩 What WebViewLab Solves
+
+### Test Web Apps Inside a Native Shell
+- Load any URL into a full-screen WebView
+- Use a mobile user agent
+- Allow Appium to switch to `WEBVIEW_*` context and inspect DOM elements directly
+
+### Validate Appium Automation Mapping
+- Cross-check how HTML elements translate into Appium XML trees
+- Compare native vs web contexts in hybrid flows
+- Verify accessibility identifiers and DOM mappings before writing automation
+
+### Simulate Touch and Coordinate-Based Flows
+- Load static UI screenshots
+- Tap anywhere to capture exact coordinates
+- Replicate gestures and touch positions without live HTML
+
+---
+
+## 🔑 Key Use Cases
+
+- Validate how a web app visually renders inside a real native WebView
+- Test hybrid UI behavior on emulators and physical devices
+- Verify accessibility IDs and selectors for Appium automation
+- Debug DOM-to-native mapping issues in hybrid apps
+- Analyze tap coordinates for gesture-based flows
+- Reduce APK rebuild cycles during rapid web UI iteration
+
+---
+
+## 🧱 High-Level Architecture
+
+```
+┌──────────────────────────────┐
+│        Web Application       │
+│  (Under Development / QA)    │
+│                              │
+│  HTML · CSS · JS · APIs       │
+└──────────────┬───────────────┘
+               │
+               │ URL Load
+               ▼
+┌──────────────────────────────┐
+│        WebViewLab App        │
+│  React Native + Expo         │
+│                              │
+│  ┌────────────────────────┐ │
+│  │    React Native UI     │ │
+│  │  (Home / Controls)    │ │
+│  └───────────┬────────────┘ │
+│              │               │
+│  ┌───────────▼────────────┐ │
+│  │     WebView Layer      │ │
+│  │ react-native-webview  │ │
+│  │ Mobile User Agent     │ │
+│  └───────────┬────────────┘ │
+│              │               │
+│  ┌───────────▼────────────┐ │
+│  │ Screenshot Mode        │ │
+│  │ Tap + Coordinate Map  │ │
+│  └────────────────────────┘ │
+└──────────────┬───────────────┘
+               │
+               │ WebView Debugging Enabled
+               ▼
+┌──────────────────────────────┐
+│           Appium             │
+│                              │
+│  Native Context              │
+│  WEBVIEW_* Context           │
+│  DOM / XML Inspection        │
+└──────────────────────────────┘
+```
+
+---
+
+## 📱 App Screens and Modes
 
 ### 1. Home Screen
-- Input a URL or upload a screenshot from gallery  
-- **Go** → open WebView or Screenshot mode  
-- Error banner for permission/load issues  
+- Input a URL to launch WebView mode
+- Upload a screenshot to launch Screenshot mode
+- Basic error handling for load and permission failures
 
 ### 2. WebView Mode
-- Full-screen WebView with mobile UA  
-- Floating controls: **Back, Reload, Toggle Overlay (L), Exit**  
-- Overlay shows last tap coordinates  
-- Appium can attach via `WEBVIEW_com.example.webviewlab`  
+- Full-screen WebView with mobile configuration
+- Floating controls: Back, Reload, Toggle Overlay, Exit
+- Overlay displays last tap coordinates
+- Appium attachable via `WEBVIEW_com.example.webviewlab`
 
 ### 3. Screenshot Mode
-- Display image full-screen, scaled to fit  
-- Tapping shows a green dot at tap point  
-- Coordinates shown for both display and original pixels  
-- Exit returns to Home  
+- Displays image full-screen and scaled to fit device
+- Tapping shows visual marker and pixel coordinates
+- Useful for gesture planning and automation replication
 
 ---
 
-## ⚙️ Technical Notes
+## ⚙️ Technical Overview
 
-- **React Native + Expo**  
-- `react-native-webview` for hybrid testing  
-- `expo-image-picker` for screenshot uploads  
-- `usesCleartextTraffic=true` in manifest (for `http://` test pages)  
-- WebView debugging enabled (Appium + Chrome DevTools attachable)  
+- React Native with Expo
+- react-native-webview for hybrid rendering
+- expo-image-picker for screenshot uploads
+- WebView debugging enabled for Appium and Chrome DevTools
+- usesCleartextTraffic enabled for http test URLs
 
 ---
 
-## 🖥️ Setup (Windows)
+## 🖥️ Development Setup (Windows)
 
-- Node.js LTS  
-- JDK 11  
-- Android SDK (Platform 35, Build Tools 35)  
+### Prerequisites
+- Node.js LTS
+- JDK 11
+- Android SDK (Platform 35, Build Tools 35)
 
-Environment variables:
+### Environment Variables
 ```
-JAVA_HOME = <JDK11 path>
-ANDROID_SDK_ROOT = <SDK root>
-PATH += %JAVA_HOME%\bin;%ANDROID_SDK_ROOT%\platform-tools
-```
-
-Validation:
-```powershell
-node -v
-java -version
-adb version
+JAVA_HOME=<JDK11 path>
+ANDROID_SDK_ROOT=<SDK root>
 ```
 
-Dependencies:
+### Install Dependencies
 ```bash
 npm ci
-# or
-yarn install --frozen-lockfile
 ```
 
 ---
 
 ## 🖥️ Build Options
-### EAS Build (Android)
 
+### EAS Build
 ```bash
 npm install -g eas-cli
 eas login
 eas build --platform android
-# or
-# eas build --platform all
 ```
 
-### Local Android Release Build (APK)
-
-If `android/` folder doesn’t exist:
+### Local APK Build
 ```bash
 npx expo prebuild -p android
-```
-
-> **Critical:** Enable WebView debugging in release builds so Appium can attach.  
-> Edit:
-> ```
-> WebViewLab-React-Native-App/android/app/src/main/java/com/example/webviewlab/MainApplication.kt
-> ```
-> Add:
-> ```kotlin
-> // Critical: expose WEBVIEW_* context even in release builds
-> WebView.setWebContentsDebuggingEnabled(true)
-> ```
-
-Then build:
-```powershell
 cd android
-.\gradlew.bat clean
-.\gradlew.bat :app:assembleRelease --stacktrace --no-daemon
+./gradlew assembleRelease
 ```
 
-Artifacts:
-- APK: `android/app/build/outputs/apk/release/app-release.apk`
-- AAB: `android/app/build/outputs/bundle/release/app-release.aab`
-
-Install to device:
-```powershell
-adb install -r android/app/build/outputs/apk/release/app-release.apk
+Enable WebView debugging in `MainApplication.kt`:
+```kotlin
+WebView.setWebContentsDebuggingEnabled(true)
 ```
 
 ---
@@ -141,4 +174,3 @@ adb install -r android/app/build/outputs/apk/release/app-release.apk
 ## 📄 License
 
 MIT License
-
