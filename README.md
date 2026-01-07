@@ -91,7 +91,16 @@ yarn install --frozen-lockfile
 
 ---
 
-## 🏗️ Build Options
+## 🖥️ Build Options
+### EAS Build (Android)
+
+```bash
+npm install -g eas-cli
+eas login
+eas build --platform android
+# or
+# eas build --platform all
+```
 
 ### Local Android Release Build (APK)
 
@@ -132,3 +141,4 @@ adb install -r android/app/build/outputs/apk/release/app-release.apk
 ## 📄 License
 
 MIT License
+

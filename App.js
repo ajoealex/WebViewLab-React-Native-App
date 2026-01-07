@@ -5,34 +5,69 @@ import {
   BackHandler,
   Image,
   Platform,
-  SafeAreaView,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   useWindowDimensions,
   View
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { WebView } from "react-native-webview";
 
 const UA_MOBILE =
   "Mozilla/5.0 (Linux; Android 12; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36";
 
+const THEME = {
+  canvas: "#f7f1eb",
+  ink: "#0f172a",
+  inkSoft: "#1f2937",
+  muted: "#6b7280",
+  line: "#e2e8f0",
+  surface: "#ffffff",
+  surfaceAlt: "#f8fafc",
+  accent: "#f97316",
+  accentDark: "#c2410c",
+  accentSoft: "#ffedd5",
+  success: "#10b981",
+  danger: "#ef4444",
+  shadow: "rgba(15, 23, 42, 0.16)"
+};
+
+const TITLE_FONT = Platform.select({
+  ios: "AvenirNext-DemiBold",
+  android: "sans-serif-condensed",
+  default: "sans-serif"
+});
+
+const BODY_FONT = Platform.select({
+  ios: "AvenirNext-Regular",
+  android: "sans-serif",
+  default: "sans-serif"
+});
+
 // Compact button
-const ToolbarButton = ({ title, onPress, disabled }) => (
+const ToolbarButton = ({ title, onPress, disabled, variant = "primary" }) => (
   <TouchableOpacity
     onPress={onPress}
     disabled={disabled}
-    style={{
-      paddingHorizontal: 12,
-      paddingVertical: 10,
-      backgroundColor: disabled ? "#e5e7eb" : "#111827",
-      borderRadius: 8,
-      marginRight: 8
-    }}
+    style={[
+      styles.buttonBase,
+      variant === "primary" ? styles.buttonPrimary : styles.buttonSecondary,
+      disabled && styles.buttonDisabled
+    ]}
   >
-    <Text style={{ color: disabled ? "#9ca3af" : "#ffffff", fontWeight: "600" }}>{title}</Text>
+    <Text
+      style={[
+        styles.buttonText,
+        variant === "primary" && styles.buttonTextOnPrimary,
+        disabled && styles.buttonTextDisabled
+      ]}
+    >
+      {title}
+    </Text>
   </TouchableOpacity>
 );
 
@@ -42,18 +77,9 @@ const FloatingBtn = ({ label, onPress, disabled, marginTop = 0 }) => (
     onPress={onPress}
     disabled={disabled}
     hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-    style={{
-      marginTop,
-      alignItems: "center",
-      justifyContent: "center",
-      width: 48,
-      height: 48,
-      borderRadius: 24,
-      backgroundColor: disabled ? "rgba(17,24,39,0.35)" : "rgba(17,24,39,0.85)",
-      elevation: 8
-    }}
+    style={[styles.floatingButton, marginTop ? { marginTop } : null, disabled && styles.floatingButtonDisabled]}
   >
-    <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>{label}</Text>
+    <Text style={styles.floatingButtonText}>{label}</Text>
   </TouchableOpacity>
 );
 
@@ -243,69 +269,73 @@ export default function App() {
   // =========================
   if (view === "home") {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffff" }}>
-        <ScrollView contentContainerStyle={{ padding: 16 }} keyboardShouldPersistTaps="handled">
-          {/* URL */}
-          <Text style={{ fontSize: 12, color: "#6b7280", marginBottom: 6 }}>URL:</Text>
-          <TextInput
-            value={inputUrl}
-            onChangeText={setInputUrl}
-            placeholder="https://target-site.example"
-            keyboardType="url"
-            autoCapitalize="none"
-            autoCorrect={false}
-            style={{
-              borderWidth: 1,
-              borderColor: "#d1d5db",
-              borderRadius: 10,
-              paddingHorizontal: 12,
-              height: 48,
-              marginBottom: 16
-            }}
-            onSubmitEditing={onGo}
-          />
+      <SafeAreaView style={styles.screen}>
+        <View pointerEvents="none" style={styles.background}>
+          <View style={styles.blobOne} />
+          <View style={styles.blobTwo} />
+          <View style={styles.blobThree} />
+        </View>
+        <ScrollView contentContainerStyle={styles.homeContent} keyboardShouldPersistTaps="handled">
+          <Text style={styles.eyebrow}>Web View Visualizer</Text>
+          <Text style={styles.title}>See your site inside a native shell.</Text>
+          <Text style={styles.subtitle}>
+            Preview how your live web app feels inside a mobile hybrid container, or upload a screenshot to capture
+            tap coordinates.
+          </Text>
 
-          {/* horizontal rule */}
-          <View style={{ height: 1, backgroundColor: "#e5e7eb", marginVertical: 12 }} />
-
-          {/* screenshot row */}
-          <Text style={{ fontSize: 12, color: "#6b7280", marginBottom: 6 }}>or choose a screenshot:</Text>
-          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
-            <ToolbarButton title="Upload Screenshot" onPress={onPickScreenshot} />
-            <ToolbarButton title="Clear Screenshot" onPress={() => setPicked(null)} disabled={!picked} />
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Load a URL</Text>
+            <Text style={styles.cardLabel}>Website address</Text>
+            <TextInput
+              value={inputUrl}
+              onChangeText={setInputUrl}
+              placeholder="https://target-site.example"
+              keyboardType="url"
+              autoCapitalize="none"
+              autoCorrect={false}
+              style={styles.input}
+              onSubmitEditing={onGo}
+              placeholderTextColor={THEME.muted}
+            />
+            <View style={styles.buttonRow}>
+              <ToolbarButton title="Open WebView" onPress={onGo} />
+            </View>
           </View>
 
-          {/* selected file info */}
-          {picked?.uri ? (
-            <>
-              <Text style={{ color: "#374151", marginTop: 4 }} numberOfLines={1}>
-                Selected: {picked.uri}
-              </Text>
-              {!!picked.width && !!picked.height ? (
-                <Text style={{ color: "#6b7280", marginTop: 2 }}>
-                  {picked.width}×{picked.height}px
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Analyze a Screenshot</Text>
+            <Text style={styles.cardLabel}>Choose an image from your device</Text>
+            <View style={styles.buttonRow}>
+              <ToolbarButton title="Upload Screenshot" onPress={onPickScreenshot} variant="secondary" />
+              <ToolbarButton
+                title="Clear"
+                onPress={() => setPicked(null)}
+                disabled={!picked}
+                variant="secondary"
+              />
+            </View>
+            <View style={styles.buttonRow}>
+              <ToolbarButton title="Open Screenshot" onPress={onGo} disabled={!picked} />
+            </View>
+            {picked?.uri ? (
+              <View style={styles.selectedWrap}>
+                <Text style={styles.selectedText} numberOfLines={1}>
+                  Selected: {picked.uri}
                 </Text>
-              ) : null}
-            </>
-          ) : null}
-
-          {/* Go button */}
-          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
-            <ToolbarButton title="Go" onPress={onGo} />
+                {!!picked.width && !!picked.height ? (
+                  <Text style={styles.selectedMeta}>
+                    {picked.width} x {picked.height}px
+                  </Text>
+                ) : null}
+              </View>
+            ) : (
+              <Text style={styles.emptyHint}>No screenshot selected.</Text>
+            )}
           </View>
 
           {!!lastError && (
-            <View
-              style={{
-                marginTop: 12,
-                padding: 10,
-                backgroundColor: "#fef2f2",
-                borderColor: "#fecaca",
-                borderWidth: 1,
-                borderRadius: 8
-              }}
-            >
-              <Text style={{ color: "#991b1b" }}>{lastError}</Text>
+            <View style={styles.errorBox}>
+              <Text style={styles.errorText}>{lastError}</Text>
             </View>
           )}
         </ScrollView>
@@ -318,9 +348,9 @@ export default function App() {
   // =========================
   if (view === "shot" && picked?.uri) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }}>
+      <SafeAreaView style={styles.darkScreen}>
         <View
-          style={{ flex: 1, backgroundColor: "#000" }}
+          style={styles.darkScreen}
           onLayout={(e) => {
             const { width, height } = e.nativeEvent.layout;
             setContainerLayout({ w: width, h: height });
@@ -328,21 +358,14 @@ export default function App() {
           onStartShouldSetResponder={() => true}
           onResponderRelease={onImagePress}
         >
-          <Image source={{ uri: picked.uri }} resizeMode="contain" style={{ width: "100%", height: "100%" }} />
+          <Image source={{ uri: picked.uri }} resizeMode="contain" style={styles.full} />
           {tapPoint && (
             <View
               pointerEvents="none"
-              style={{
-                position: "absolute",
-                left: displayDims.offsetX + tapPoint.dx - 6,
-                top: displayDims.offsetY + tapPoint.dy - 6,
-                width: 12,
-                height: 12,
-                borderRadius: 6,
-                backgroundColor: "#10b981",
-                borderWidth: 2,
-                borderColor: "#047857"
-              }}
+              style={[
+                styles.tapDot,
+                { left: displayDims.offsetX + tapPoint.dx - 6, top: displayDims.offsetY + tapPoint.dy - 6 }
+              ]}
             />
           )}
         </View>
@@ -350,17 +373,7 @@ export default function App() {
         {/* Exit only */}
         <View
           pointerEvents="box-none"
-          style={{
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            right: 12,
-            width: 60,
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 20,
-            elevation: 20
-          }}
+          style={styles.floatingRail}
         >
           <FloatingBtn
             label={"Exit"}
@@ -373,19 +386,8 @@ export default function App() {
 
         {/* Bottom-right coordinates */}
         {tapPoint && (
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              right: 12,
-              bottom: 12,
-              backgroundColor: "#000",
-              paddingHorizontal: 10,
-              paddingVertical: 6,
-              borderRadius: 6
-            }}
-          >
-            <Text style={{ color: "#fff", fontWeight: "700" }}>{`x:${tapPoint.dx}, y:${tapPoint.dy} | orig:${tapPoint.ox}px, ${tapPoint.oy}px`}</Text>
+          <View pointerEvents="none" style={styles.coordBadge}>
+            <Text style={styles.coordText}>{`x:${tapPoint.dx}, y:${tapPoint.dy} | orig:${tapPoint.ox}px, ${tapPoint.oy}px`}</Text>
           </View>
         )}
       </SafeAreaView>
@@ -396,7 +398,7 @@ export default function App() {
   // WEBVIEW
   // =========================
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <SafeAreaView style={styles.webScreen}>
       <View style={{ flex: 1 }}>
         <WebView
           ref={webRef}
@@ -454,17 +456,7 @@ export default function App() {
         {/* Right-side floating buttons */}
         <View
           pointerEvents="box-none"
-          style={{
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            right: 12,
-            width: 60,
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 20,
-            elevation: 20
-          }}
+          style={styles.floatingRail}
         >
           <FloatingBtn label={"Back"} onPress={() => webRef.current?.goBack()} disabled={!canGoBack} />
           <FloatingBtn label={"Reload"} onPress={() => webRef.current?.reload()} marginTop={16} />
@@ -483,20 +475,8 @@ export default function App() {
 
         {/* Coordinates top-left (toggleable) */}
         {showCoords && tapPoint && (
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              top: 12,
-              left: 12,
-              backgroundColor: "#000",
-              paddingHorizontal: 10,
-              paddingVertical: 6,
-              borderRadius: 6,
-              zIndex: 25
-            }}
-          >
-            <Text style={{ color: "#fff", fontWeight: "700" }}>{`x:${tapPoint.dx}, y:${tapPoint.dy}`}</Text>
+          <View pointerEvents="none" style={styles.coordBadgeTop}>
+            <Text style={styles.coordText}>{`x:${tapPoint.dx}, y:${tapPoint.dy}`}</Text>
           </View>
         )}
       </View>
@@ -518,20 +498,7 @@ export default function App() {
       ) : null}
 
       {!!lastError && (
-        <View
-          style={{
-            position: "absolute",
-            bottom: 12,
-            left: 12,
-            right: 12,
-            padding: 10,
-            backgroundColor: "#fef2f2",
-            borderWidth: 1,
-            borderColor: "#fecaca",
-            borderRadius: 10,
-            zIndex: 15
-          }}
-        >
+        <View style={styles.errorToast}>
           <Text style={{ color: "#991b1b" }} numberOfLines={2}>
             {lastError}
           </Text>
@@ -540,3 +507,266 @@ export default function App() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: THEME.canvas
+  },
+  webScreen: {
+    flex: 1,
+    backgroundColor: THEME.surface
+  },
+  darkScreen: {
+    flex: 1,
+    backgroundColor: "#0b0b0b"
+  },
+  background: {
+    ...StyleSheet.absoluteFillObject
+  },
+  blobOne: {
+    position: "absolute",
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: "#ffe4d5",
+    top: -120,
+    left: -60,
+    opacity: 0.95
+  },
+  blobTwo: {
+    position: "absolute",
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: "#e0f2fe",
+    top: 140,
+    right: -80,
+    opacity: 0.8
+  },
+  blobThree: {
+    position: "absolute",
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: "#fde68a",
+    bottom: -140,
+    left: 60,
+    opacity: 0.7
+  },
+  homeContent: {
+    padding: 20,
+    paddingBottom: 36
+  },
+  eyebrow: {
+    fontSize: 12,
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    color: THEME.muted,
+    marginBottom: 6,
+    fontFamily: BODY_FONT
+  },
+  title: {
+    fontSize: 30,
+    lineHeight: 36,
+    color: THEME.ink,
+    marginBottom: 8,
+    fontFamily: TITLE_FONT
+  },
+  subtitle: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: THEME.inkSoft,
+    marginBottom: 20,
+    fontFamily: BODY_FONT
+  },
+  card: {
+    backgroundColor: THEME.surface,
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: THEME.line,
+    shadowColor: THEME.shadow,
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 5
+  },
+  cardTitle: {
+    fontSize: 16,
+    color: THEME.ink,
+    marginBottom: 6,
+    fontFamily: TITLE_FONT
+  },
+  cardLabel: {
+    fontSize: 12,
+    color: THEME.muted,
+    marginBottom: 8,
+    fontFamily: BODY_FONT
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: THEME.line,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    height: 48,
+    backgroundColor: THEME.surfaceAlt,
+    fontFamily: BODY_FONT,
+    color: THEME.ink
+  },
+  buttonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+    flexWrap: "wrap"
+  },
+  buttonBase: {
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginRight: 10,
+    marginBottom: 6,
+    shadowColor: THEME.shadow,
+    shadowOpacity: 0.16,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3
+  },
+  buttonPrimary: {
+    backgroundColor: THEME.accent
+  },
+  buttonSecondary: {
+    backgroundColor: THEME.surfaceAlt,
+    borderWidth: 1,
+    borderColor: THEME.line
+  },
+  buttonDisabled: {
+    backgroundColor: "#e5e7eb",
+    shadowOpacity: 0
+  },
+  buttonText: {
+    color: THEME.ink,
+    fontWeight: "700",
+    fontFamily: BODY_FONT
+  },
+  buttonTextOnPrimary: {
+    color: "#ffffff"
+  },
+  buttonTextDisabled: {
+    color: "#9ca3af"
+  },
+  selectedWrap: {
+    marginTop: 8
+  },
+  selectedText: {
+    color: THEME.inkSoft,
+    fontFamily: BODY_FONT
+  },
+  selectedMeta: {
+    marginTop: 4,
+    color: THEME.muted,
+    fontFamily: BODY_FONT
+  },
+  emptyHint: {
+    marginTop: 8,
+    color: THEME.muted,
+    fontFamily: BODY_FONT
+  },
+  errorBox: {
+    marginTop: 10,
+    padding: 12,
+    backgroundColor: "#fef2f2",
+    borderColor: "#fecaca",
+    borderWidth: 1,
+    borderRadius: 12
+  },
+  errorText: {
+    color: "#991b1b",
+    fontFamily: BODY_FONT
+  },
+  full: {
+    width: "100%",
+    height: "100%"
+  },
+  tapDot: {
+    position: "absolute",
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: THEME.success,
+    borderWidth: 2,
+    borderColor: "#047857"
+  },
+  floatingRail: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    right: 12,
+    width: 60,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 20,
+    elevation: 20
+  },
+  floatingButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(15, 23, 42, 0.92)",
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 8
+  },
+  floatingButtonDisabled: {
+    backgroundColor: "rgba(15, 23, 42, 0.35)"
+  },
+  floatingButtonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "700",
+    fontFamily: BODY_FONT
+  },
+  coordBadge: {
+    position: "absolute",
+    right: 12,
+    bottom: 12,
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10
+  },
+  coordBadgeTop: {
+    position: "absolute",
+    top: 12,
+    left: 12,
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    zIndex: 25
+  },
+  coordText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontFamily: BODY_FONT
+  },
+  errorToast: {
+    position: "absolute",
+    bottom: 12,
+    left: 12,
+    right: 12,
+    padding: 10,
+    backgroundColor: "#fef2f2",
+    borderWidth: 1,
+    borderColor: "#fecaca",
+    borderRadius: 12,
+    zIndex: 15
+  }
+});
+
+
